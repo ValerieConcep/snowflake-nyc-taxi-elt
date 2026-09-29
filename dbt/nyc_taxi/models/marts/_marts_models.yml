@@ -1,0 +1,51 @@
+version: 2
+
+models:
+  - name: dim_zones
+    description: One row per NYC TLC taxi zone (from the taxi_zones seed).
+    columns:
+      - name: location_id
+        description: TLC taxi zone ID. Primary key.
+        data_tests:
+          - unique
+          - not_null
+
+  - name: dim_date
+    description: Calendar dimension, one row per day for the loaded period.
+    columns:
+      - name: date_day
+        description: Calendar date. Primary key.
+        data_tests:
+          - unique
+          - not_null
+
+  - name: fct_trips
+    description: One row per valid yellow taxi trip. Invalid trips (negative totals, zero distance, bad timestamps) are excluded.
+    columns:
+      - name: trip_id
+        description: Surrogate key from staging. Primary key.
+        data_tests:
+          - unique
+          - not_null
+      - name: pickup_date
+        description: Date of pickup. Foreign key to dim_date.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_day
+      - name: pickup_location_id
+        description: Pickup zone. Foreign key to dim_zones.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_zones')
+                field: location_id
+      - name: dropoff_location_id
+        description: Dropoff zone. Foreign key to dim_zones.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_zones')
+                field: location_id

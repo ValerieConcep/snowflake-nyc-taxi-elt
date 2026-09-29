@@ -11,6 +11,11 @@ snapshot-paths: ["snapshots"]
 
 clean-targets: ["target", "dbt_packages"]
 
+seeds:
+  nyc_taxi:
+    +schema: seeds
+    +quote_columns: false
+
 models:
   nyc_taxi:
     staging:
