@@ -1,0 +1,10 @@
+version: 2
+
+sources:
+  - name: nyc_taxi
+    description: Raw NYC TLC yellow taxi trips loaded from S3 via COPY INTO.
+    database: RAW
+    schema: NYC_TAXI
+    tables:
+      - name: yellow_trips
+        description: One row per trip as published by NYC TLC (Parquet), plus lineage columns.
