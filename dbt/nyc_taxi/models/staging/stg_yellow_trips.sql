@@ -24,8 +24,8 @@ renamed as (
         pulocationid::int                           as pickup_location_id,
         dolocationid::int                           as dropoff_location_id,
 
-        tpep_pickup_datetime::timestamp_ntz         as pickup_at,
-        tpep_dropoff_datetime::timestamp_ntz        as dropoff_at,
+        to_timestamp_ntz(tpep_pickup_datetime, 6)        as pickup_at,
+        to_timestamp_ntz(tpep_dropoff_datetime, 6)       as dropoff_at,
 
         passenger_count::int                        as passenger_count,
         trip_distance::number(10, 2)                as trip_distance_miles,

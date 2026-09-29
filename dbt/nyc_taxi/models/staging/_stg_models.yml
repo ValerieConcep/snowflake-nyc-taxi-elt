@@ -1,0 +1,27 @@
+version: 2
+
+models:
+  - name: stg_yellow_trips
+    description: Cleaned, typed, and de-duplicated yellow taxi trips. One row per trip.
+    columns:
+      - name: trip_id
+        description: Surrogate key (MD5 hash of identifying trip fields).
+        data_tests:
+          - unique
+          - not_null
+      - name: pickup_at
+        description: Timestamp when the meter was engaged (converted from microseconds since epoch).
+        data_tests:
+          - not_null
+      - name: dropoff_at
+        description: Timestamp when the meter was disengaged (converted from microseconds since epoch).
+        data_tests:
+          - not_null
+      - name: pickup_location_id
+        description: TLC taxi zone ID where the trip started.
+        data_tests:
+          - not_null
+      - name: dropoff_location_id
+        description: TLC taxi zone ID where the trip ended.
+        data_tests:
+          - not_null
