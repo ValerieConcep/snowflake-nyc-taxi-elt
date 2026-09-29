@@ -1,0 +1,32 @@
+USE ROLE TRANSFORMER;
+USE WAREHOUSE TRANSFORM_WH;
+USE SCHEMA RAW.NYC_TAXI;
+
+-- 1. See the files Snowflake can read from S3
+LIST @NYC_TAXI_STAGE/yellow/;
+
+-- 2. Create the table by reading the column names/types from the parquet files
+CREATE TABLE IF NOT EXISTS YELLOW_TRIPS USING TEMPLATE (
+  SELECT ARRAY_AGG(OBJECT_CONSTRUCT(*)) WITHIN GROUP (ORDER BY ORDER_ID)
+  FROM TABLE(INFER_SCHEMA(
+    LOCATION => '@NYC_TAXI_STAGE/yellow/',
+    FILE_FORMAT => 'PARQUET_FF',
+    IGNORE_CASE => TRUE
+  ))
+);
+
+-- 3. Add lineage columns: which file each row came from, and when it was loaded
+ALTER TABLE YELLOW_TRIPS ADD COLUMN IF NOT EXISTS _SOURCE_FILE STRING;
+ALTER TABLE YELLOW_TRIPS ADD COLUMN IF NOT EXISTS _LOADED_AT TIMESTAMP_LTZ;
+
+-- 4. Load the data (Snowflake remembers loaded files, so re-running won't duplicate)
+COPY INTO YELLOW_TRIPS
+FROM @NYC_TAXI_STAGE/yellow/
+MATCH_BY_COLUMN_NAME = CASE_INSENSITIVE
+INCLUDE_METADATA = (_SOURCE_FILE = METADATA$FILENAME, _LOADED_AT = METADATA$START_SCAN_TIME);
+
+-- 5. Check: rows per file
+SELECT _SOURCE_FILE, COUNT(*) AS row_count
+FROM YELLOW_TRIPS
+GROUP BY 1
+ORDER BY 1;
